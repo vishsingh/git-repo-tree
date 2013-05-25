@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+//import "fmt"
 import "io/ioutil"
+
+func ProcessDirectory(full_path string) {
+	
+}
 
 func RecurseInto(full_path string, depth int) {
 	files, err := ioutil.ReadDir(full_path)
@@ -9,18 +13,11 @@ func RecurseInto(full_path string, depth int) {
 		return
 	}
 
+	ProcessDirectory(full_path)
+
 	for i := 0; i < len(files); i++ {
-		file_name := files[i].Name()
-
-		indent := ""
-		for j := 0; j < depth; j++ {
-			indent += " "
-		}
-
-		fmt.Println(indent, "file", i, "is called", file_name)
-
 		if files[i].IsDir() {
-			RecurseInto(full_path + "/" + file_name, depth + 1)
+			RecurseInto(full_path + "/" + files[i].Name(), depth + 1)
 		}
 	}
 }
