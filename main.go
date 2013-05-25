@@ -3,7 +3,14 @@ package main
 //import "fmt"
 import "io/ioutil"
 
-func ProcessDirectory(full_path string) {
+func ProcessDirectory(full_path string, depth int) {
+	// the directory must be classified as either
+	// - not git at all
+	// - git, in which case the recursion must stop
+	//   - git-auto-commit
+	//   - dirty
+	//   - clean
+
 	
 }
 
@@ -13,7 +20,7 @@ func RecurseInto(full_path string, depth int) {
 		return
 	}
 
-	ProcessDirectory(full_path)
+	ProcessDirectory(full_path, depth)
 
 	for i := 0; i < len(files); i++ {
 		if files[i].IsDir() {
