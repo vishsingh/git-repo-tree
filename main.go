@@ -4,6 +4,7 @@ import "fmt"
 import "io/ioutil"
 import "os"
 import "os/exec"
+import "bytes"
 
 type DirectoryClassification int
 
@@ -48,8 +49,38 @@ func ClassifyDirectory(path string) DirectoryClassification {
 		return NotGitDirectory
 	}
 
-	// this is where you do more analysis
-	return GitCleanDirectory
+	return ClassifyGitDirectory(path)
+}
+
+func ClassifyGitDirectory(path string) DirectoryClassification {
+	// auto-commit if git symbolic-ref -q HEAD returns the same as the contents of .git-auto-commit
+
+	gitautocommit, err := ioutil.ReadFile(path + "/.git-auto-commit")
+	if err == nil {
+		symrefcmd := exec.Command("/usr/bin/git", "symbolic-ref", "-q", "HEAD")
+		symrefcmd.Dir = path
+		
+		symrefout, err := symrefcmd.Output()
+		if err == nil {
+			if bytes.Equal(gitautocommit, symrefout) {
+				return GitAutoCommitDirectory
+			}
+		}
+	}
+
+	// clean if git status --porcelain is empty
+
+	statuscmd := exec.Command("/usr/bin/git", "status", "--porcelain")
+	statuscmd.Dir = path
+
+	statuscmdout, err := statuscmd.Output()
+	if err == nil {
+		if bytes.Equal(statuscmdout, nil) {
+			return GitCleanDirectory
+		}
+	}
+
+	return GitDirtyDirectory
 }
 
 func ProcessDirectory(full_path string, depth int) {
@@ -60,8 +91,18 @@ func ProcessDirectory(full_path string, depth int) {
 	//   - dirty
 	//   - clean
 
-	if ClassifyDirectory(full_path) == GitCleanDirectory {
+	dirclass := ClassifyDirectory(full_path)
+
+	if dirclass == GitCleanDirectory {
 		fmt.Printf("found git directory: %s\n", full_path)
+	}
+
+	if dirclass == GitAutoCommitDirectory {
+		fmt.Printf("found git-auto-commit directory: %s\n", full_path)
+	}
+
+	if dirclass == GitDirtyDirectory {
+		fmt.Printf("found DIRTY git directory: %s\n", full_path)
 	}
 }
 
