@@ -139,13 +139,11 @@ func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryC
 		} else {
 			fmt.Printf("%s%s%s/%s\n", CLR_M, Tab(depth), LastPartOfPath(full_path), CLR_N)
 		}
+
+		return anyUnder
 	}
 
-	if dirclass == NotGitDirectory && !AnyGitDirUnder(full_path, gitDirs) {
-		return false
-	}
-
-	return dirclass == NotGitDirectory
+	return false
 }
 
 func RecurseInto(full_path string, depth int, callback func(string, int) bool, nondircallback func(string, int)) {
