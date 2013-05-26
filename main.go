@@ -5,6 +5,7 @@ import "io/ioutil"
 import "os"
 import "os/exec"
 import "bytes"
+import "strings"
 
 type DirectoryClassification int
 
@@ -127,9 +128,37 @@ func RecurseInto(full_path string, depth int, callback func(string, int) bool) {
 	}
 }
 
+func AnyGitDirUnder(path string, gitDirs map[string]DirectoryClassification) bool {
+	for gitDir, _ := range gitDirs {
+		if gitDir == path {
+			return true
+		}
+
+		if strings.HasPrefix(gitDir, path + "/") {
+			return true
+		}
+	}
+
+	return false
+}
+
 func main() {
 	// this program starts at the current directory
 	// and recurses down, in sorted order, to find all the git repos
+
+	gitDirs := make(map[string]DirectoryClassification)
+
+	collector := func (path string, depth int) bool {
+		dirclass := ClassifyDirectory(path)
+
+		if dirclass != NotGitDirectory {
+			gitDirs[path] = dirclass
+		}
+
+		return dirclass == NotGitDirectory
+	}
+
+	RecurseInto(".", 0, collector)
 
 	RecurseInto(".", 0, ProcessDirectory)
 }
