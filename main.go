@@ -85,7 +85,7 @@ func ClassifyGitDirectory(path string) DirectoryClassification {
 }
 
 // returns whether we should continue iterating
-func ProcessDirectory(full_path string, depth int) bool {
+func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryClassification) bool {
 	// the directory must be classified as either
 	// - not git at all
 	// - git, in which case the recursion must stop
@@ -105,6 +105,11 @@ func ProcessDirectory(full_path string, depth int) bool {
 
 	if dirclass == GitDirtyDirectory {
 		fmt.Printf("found DIRTY git directory: %s\n", full_path)
+	}
+
+	if dirclass == NotGitDirectory && !AnyGitDirUnder(full_path, gitDirs) {
+		fmt.Printf("found untracked directory: %s\n", full_path)
+		return false
 	}
 
 	return dirclass == NotGitDirectory
@@ -160,5 +165,7 @@ func main() {
 
 	RecurseInto(".", 0, collector)
 
-	RecurseInto(".", 0, ProcessDirectory)
+	RecurseInto(".", 0, func (path string, depth int) bool {
+		return ProcessDirectory(path, depth, gitDirs)
+	})
 }
