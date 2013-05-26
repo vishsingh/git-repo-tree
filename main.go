@@ -139,7 +139,7 @@ func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryC
 		if anyUnder {
 			fmt.Printf("%s%s%s/%s\n", CLR_N, Tab(depth), LastPartOfPath(full_path), CLR_N)
 		} else {
-			fmt.Printf("%s%s%s/%s\n", CLR_N, Tab(depth), LastPartOfPath(full_path), CLR_N)
+			fmt.Printf("%s%s%s/%s\n", CLR_M, Tab(depth), LastPartOfPath(full_path), CLR_N)
 		}
 	}
 
@@ -206,5 +206,5 @@ func main() {
 		".", 
 		0, 
 		func (path string, depth int) bool { return ProcessDirectory(path, depth, gitDirs) },
-		func (path string, depth int) { fmt.Printf("%s%s\n", Tab(depth), LastPartOfPath(path)) })
+		func (path string, depth int) { fmt.Printf("%s%s%s%s\n", CLR_M, Tab(depth), LastPartOfPath(path), CLR_N) })
 }
