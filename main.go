@@ -102,6 +102,14 @@ func Tab(depth int) string {
 	return indent
 }
 
+func LastPartOfPath(path string) string {
+	i := strings.LastIndex(path, "/")
+	if i == -1 {
+		return path
+	}
+	return path[i+1:]
+}
+
 // returns whether we should continue iterating
 func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryClassification) bool {
 	// the directory must be classified as either
@@ -114,24 +122,24 @@ func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryC
 	dirclass := ClassifyDirectory(full_path)
 
 	if dirclass == GitCleanDirectory {
-		fmt.Printf("%s%s%s/%s\n", CLR_G, Tab(depth), full_path, CLR_N)
+		fmt.Printf("%s%s%s/%s\n", CLR_G, Tab(depth), LastPartOfPath(full_path), CLR_N)
 	}
 
 	if dirclass == GitAutoCommitDirectory {
-		fmt.Printf("%s%s%s/%s\n", CLR_B, Tab(depth), full_path, CLR_N)
+		fmt.Printf("%s%s%s/%s\n", CLR_B, Tab(depth), LastPartOfPath(full_path), CLR_N)
 	}
 
 	if dirclass == GitDirtyDirectory {
-		fmt.Printf("%s%s%s/%s\n", CLR_R, Tab(depth), full_path, CLR_N)
+		fmt.Printf("%s%s%s/%s\n", CLR_R, Tab(depth), LastPartOfPath(full_path), CLR_N)
 	}
 	
 	if dirclass == NotGitDirectory {
 		anyUnder := AnyGitDirUnder(full_path, gitDirs)
 
 		if anyUnder {
-			fmt.Printf("%s%s%s/%s\n", CLR_N, Tab(depth), full_path, CLR_N)
+			fmt.Printf("%s%s%s/%s\n", CLR_N, Tab(depth), LastPartOfPath(full_path), CLR_N)
 		} else {
-			fmt.Printf("%s%s%s/%s\n", CLR_N, Tab(depth), full_path, CLR_N)
+			fmt.Printf("%s%s%s/%s\n", CLR_N, Tab(depth), LastPartOfPath(full_path), CLR_N)
 		}
 	}
 
@@ -198,5 +206,5 @@ func main() {
 		".", 
 		0, 
 		func (path string, depth int) bool { return ProcessDirectory(path, depth, gitDirs) },
-		func (path string, depth int) { fmt.Printf("%s%s\n", Tab(depth), path) })
+		func (path string, depth int) { fmt.Printf("%s%s\n", Tab(depth), LastPartOfPath(path)) })
 }
