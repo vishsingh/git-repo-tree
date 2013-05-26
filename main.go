@@ -184,6 +184,17 @@ func AnyGitDirUnder(path string, gitDirs map[string]DirectoryClassification) boo
 	return false
 }
 
+func FilePostfix(path string) string {
+	fileinfo, err := os.Lstat(path)
+	if err == nil {
+		if fileinfo.Mode() & os.ModeSymlink != 0 {
+			return "@"
+		}
+	}
+
+	return ""
+}
+
 func main() {
 	// this program starts at the current directory
 	// and recurses down, in sorted order, to find all the git repos
@@ -206,5 +217,5 @@ func main() {
 		".", 
 		0, 
 		func (path string, depth int) bool { return ProcessDirectory(path, depth, gitDirs) },
-		func (path string, depth int) { fmt.Printf("%s%s%s%s\n", CLR_M, Tab(depth), LastPartOfPath(path), CLR_N) })
+		func (path string, depth int) { fmt.Printf("%s%s%s%s%s\n", CLR_M, Tab(depth), LastPartOfPath(path), FilePostfix(path), CLR_N) })
 }
