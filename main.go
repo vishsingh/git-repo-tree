@@ -16,6 +16,16 @@ const (
 	GitCleanDirectory
 )
 
+const CLR_0 = "\x1b[30;1m"
+const CLR_R = "\x1b[31;1m"
+const CLR_G = "\x1b[32;1m"
+const CLR_Y = "\x1b[33;1m"
+const CLR_B = "\x1b[34;1m"
+const CLR_M = "\x1b[35;1m"
+const CLR_C = "\x1b[36;1m"
+const CLR_W = "\x1b[37;1m"
+const CLR_N = "\x1b[0m"
+
 func IsRegular(m os.FileMode) bool {
 	return m & os.ModeType == 0
 }
@@ -104,24 +114,24 @@ func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryC
 	dirclass := ClassifyDirectory(full_path)
 
 	if dirclass == GitCleanDirectory {
-		fmt.Printf("%sfound git directory: %s\n", Tab(depth), full_path)
+		fmt.Printf("%s%sfound git directory: %s%s\n", CLR_G, Tab(depth), full_path, CLR_N)
 	}
 
 	if dirclass == GitAutoCommitDirectory {
-		fmt.Printf("%sfound git-auto-commit directory: %s\n", Tab(depth), full_path)
+		fmt.Printf("%s%sfound git-auto-commit directory: %s%s\n", CLR_B, Tab(depth), full_path, CLR_N)
 	}
 
 	if dirclass == GitDirtyDirectory {
-		fmt.Printf("%sfound DIRTY git directory: %s\n", Tab(depth), full_path)
+		fmt.Printf("%s%sfound DIRTY git directory: %s%s\n", CLR_R, Tab(depth), full_path, CLR_N)
 	}
 	
 	if dirclass == NotGitDirectory {
 		anyUnder := AnyGitDirUnder(full_path, gitDirs)
 
 		if anyUnder {
-			fmt.Printf("%sfound directory: %s\n", Tab(depth), full_path)
+			fmt.Printf("%s%sfound directory: %s%s\n", CLR_N, Tab(depth), full_path, CLR_N)
 		} else {
-			fmt.Printf("%sfound untracked directory: %s\n", Tab(depth), full_path)
+			fmt.Printf("%s%sfound untracked directory: %s%s\n", CLR_N, Tab(depth), full_path, CLR_N)
 		}
 	}
 
