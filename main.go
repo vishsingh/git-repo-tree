@@ -36,27 +36,25 @@ func ClassifyDirectory(path string) DirectoryClassification {
 	// .git/HEAD is a file
 	// git show-ref succeeds
 
-	files, err := ioutil.ReadDir(path + "/.git")
+	fileinfo, err := os.Lstat(path + "/.git")
 	if err != nil {
 		return NotGitDirectory
 	}
-
-	foundHEAD := false
-	for i := 0; i < len(files); i++ {
-		file := files[i]
-		if IsRegular(file.Mode()) && file.Name() == "HEAD" {
-			foundHEAD = true
-			break
-		}
+	if !fileinfo.Mode().IsDir() {
+		return NotGitDirectory
 	}
-	if !foundHEAD {
+
+	fileinfo, err = os.Lstat(path + "/.git/HEAD")
+	if err != nil {
+		return NotGitDirectory
+	}
+	if !IsRegular(fileinfo.Mode()) {
 		return NotGitDirectory
 	}
 
 	showrefcmd := exec.Command("/usr/bin/git", "show-ref")
 	showrefcmd.Dir = path
-	runerr := showrefcmd.Run()
-	if runerr != nil {
+	if showrefcmd.Run() != nil {
 		return NotGitDirectory
 	}
 
