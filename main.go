@@ -115,7 +115,7 @@ func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryC
 	return dirclass == NotGitDirectory
 }
 
-func RecurseInto(full_path string, depth int, callback func(string, int) bool) {
+func RecurseInto(full_path string, depth int, callback func(string, int) bool, nondircallback func(string, int)) {
 	files, err := ioutil.ReadDir(full_path)
 	if err != nil {
 		return
@@ -128,7 +128,9 @@ func RecurseInto(full_path string, depth int, callback func(string, int) bool) {
 
 	for i := 0; i < len(files); i++ {
 		if files[i].IsDir() {
-			RecurseInto(full_path + "/" + files[i].Name(), depth + 1, callback)
+			RecurseInto(full_path + "/" + files[i].Name(), depth + 1, callback, nondircallback)
+		} else {
+			nondircallback(full_path + "/" + files[i].Name(), depth + 1)
 		}
 	}
 }
@@ -163,9 +165,11 @@ func main() {
 		return dirclass == NotGitDirectory
 	}
 
-	RecurseInto(".", 0, collector)
+	RecurseInto(".", 0, collector, func (string, int) {})
 
-	RecurseInto(".", 0, func (path string, depth int) bool {
-		return ProcessDirectory(path, depth, gitDirs)
-	})
+	RecurseInto(
+		".", 
+		0, 
+		func (path string, depth int) bool { return ProcessDirectory(path, depth, gitDirs) },
+		func (path string, depth int) { fmt.Printf("found nondir: %s\n", path) })
 }
