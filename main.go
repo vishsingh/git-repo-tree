@@ -109,20 +109,20 @@ func ProcessDirectory(full_path string, depth int) bool {
 	return dirclass == NotGitDirectory
 }
 
-func RecurseInto(full_path string, depth int) {
+func RecurseInto(full_path string, depth int, callback func(string, int) bool) {
 	files, err := ioutil.ReadDir(full_path)
 	if err != nil {
 		return
 	}
 
-	shouldContinue := ProcessDirectory(full_path, depth)
+	shouldContinue := callback(full_path, depth)
 	if !shouldContinue {
 		return
 	}
 
 	for i := 0; i < len(files); i++ {
 		if files[i].IsDir() {
-			RecurseInto(full_path + "/" + files[i].Name(), depth + 1)
+			RecurseInto(full_path + "/" + files[i].Name(), depth + 1, callback)
 		}
 	}
 }
@@ -131,5 +131,5 @@ func main() {
 	// this program starts at the current directory
 	// and recurses down, in sorted order, to find all the git repos
 
-	RecurseInto(".", 0)
+	RecurseInto(".", 0, ProcessDirectory)
 }
