@@ -84,6 +84,14 @@ func ClassifyGitDirectory(path string) DirectoryClassification {
 	return GitDirtyDirectory
 }
 
+func Tab(depth int) string {
+	indent := ""
+	for i := 0; i < depth; i++ {
+		indent += "    "
+	}
+	return indent
+}
+
 // returns whether we should continue iterating
 func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryClassification) bool {
 	// the directory must be classified as either
@@ -96,19 +104,28 @@ func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryC
 	dirclass := ClassifyDirectory(full_path)
 
 	if dirclass == GitCleanDirectory {
-		fmt.Printf("found git directory: %s\n", full_path)
+		fmt.Printf("%sfound git directory: %s\n", Tab(depth), full_path)
 	}
 
 	if dirclass == GitAutoCommitDirectory {
-		fmt.Printf("found git-auto-commit directory: %s\n", full_path)
+		fmt.Printf("%sfound git-auto-commit directory: %s\n", Tab(depth), full_path)
 	}
 
 	if dirclass == GitDirtyDirectory {
-		fmt.Printf("found DIRTY git directory: %s\n", full_path)
+		fmt.Printf("%sfound DIRTY git directory: %s\n", Tab(depth), full_path)
+	}
+	
+	if dirclass == NotGitDirectory {
+		anyUnder := AnyGitDirUnder(full_path, gitDirs)
+
+		if anyUnder {
+			fmt.Printf("%sfound directory: %s\n", Tab(depth), full_path)
+		} else {
+			fmt.Printf("%sfound untracked directory: %s\n", Tab(depth), full_path)
+		}
 	}
 
 	if dirclass == NotGitDirectory && !AnyGitDirUnder(full_path, gitDirs) {
-		fmt.Printf("found untracked directory: %s\n", full_path)
 		return false
 	}
 
@@ -171,5 +188,5 @@ func main() {
 		".", 
 		0, 
 		func (path string, depth int) bool { return ProcessDirectory(path, depth, gitDirs) },
-		func (path string, depth int) { fmt.Printf("found nondir: %s\n", path) })
+		func (path string, depth int) { fmt.Printf("%sfound nondir: %s\n", Tab(depth), path) })
 }
