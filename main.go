@@ -108,6 +108,22 @@ func LastPartOfPath(path string) string {
 	return path[i+1:]
 }
 
+func IsAnnex(path string) bool {
+	annexinfo, err := os.Lstat(path + "/.git/annex")
+	if err != nil {
+		return false
+	}
+
+	return annexinfo.Mode().IsDir()
+}
+
+func AnnexSuffix(path string) string {
+	if IsAnnex(path) {
+		return " {annex}"
+	}
+	return ""
+}
+
 // returns whether we should continue iterating
 func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryClassification) bool {
 	// the directory must be classified as either
@@ -120,15 +136,15 @@ func ProcessDirectory(full_path string, depth int, gitDirs map[string]DirectoryC
 	dirclass := ClassifyDirectory(full_path)
 
 	if dirclass == GitCleanDirectory {
-		fmt.Printf("%s%s%s/%s\n", CLR_G, Tab(depth), LastPartOfPath(full_path), CLR_N)
+		fmt.Printf("%s%s%s/%s%s\n", CLR_G, Tab(depth), LastPartOfPath(full_path), AnnexSuffix(full_path), CLR_N)
 	}
 
 	if dirclass == GitAutoCommitDirectory {
-		fmt.Printf("%s%s%s/%s\n", CLR_B, Tab(depth), LastPartOfPath(full_path), CLR_N)
+		fmt.Printf("%s%s%s/%s%s\n", CLR_B, Tab(depth), LastPartOfPath(full_path), AnnexSuffix(full_path), CLR_N)
 	}
 
 	if dirclass == GitDirtyDirectory {
-		fmt.Printf("%s%s%s/%s\n", CLR_R, Tab(depth), LastPartOfPath(full_path), CLR_N)
+		fmt.Printf("%s%s%s/%s%s\n", CLR_R, Tab(depth), LastPartOfPath(full_path), AnnexSuffix(full_path), CLR_N)
 	}
 	
 	if dirclass == NotGitDirectory {
